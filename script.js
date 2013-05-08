@@ -1,21 +1,34 @@
 var cellsX = 20;
 var cellsY = 20;
 var startPoint = { x: cellsX / 2, y: cellsY / 2 };
-var TheGuy = Array();
 var posDelimiter = '-';
 var updateFrequency = 100;
+var chances = {// per update
+    "trolley": 0.05
+};
 var directions = {
     'West': { x: -1, y: 0 },
     'East': { x: 1, y: 0 },
     'North': { x: 0, y: -1 },
     'South': { x: 0, y: 1 },
 };
+var types = {
+    0: 'none',
+    2: 'TheGuy',
+    3: 'trolley',
+    4: 'wall',
+};
+
+var TheGuy = Array();
+var map = Array();
 var TheGuyDirection;
 
-function initBoard() {
+function init() {
     for (i = 0; i < cellsY; i++) {
+        map[i] = Array();
         for (j = 0; j < cellsX; j++) {
             $('#board').append('<div id="' + j + posDelimiter + i + '"></div>');
+            map[i][j] = 0;
         }
     }
     TheGuyDirection = directions['East'];
@@ -51,8 +64,31 @@ function addTrolley(guy) {
     guy.push(trolley);
 }
 
+function getMapDiv(x, y) {
+    return $('#' + TheGuy[i].x + posDelimiter + TheGuy[i].y);
+}
+
+// Takes a new map 2d array and update the map divs
+function draw(newMap) {
+    for (i = 0; i < cellsY; i++) {
+        for (j = 0; j < cellsX; j++) {
+            if (map[j][i] != newMap[j][i]) {
+                getMapDiv(j, i).removeClass(type[map[j][i]]);
+                getMapDiv(j, i).addClass(type[newMap[j][i]]);
+            }
+        }
+    }
+}
+
 function update() {
     var startTime = new Date().getTime();
+
+    var newMap = map;//or from scratch?
+    if (Math.random() < chances["trolley"]) {
+        foundPos = false;
+        while (!foundPos) {
+        }
+    }
 
     var oldEnd = TheGuy.pop();
     $('#' + oldEnd.x + posDelimiter + oldEnd.y).removeClass('TheGuy');
@@ -66,34 +102,31 @@ function update() {
     setTimeout(function () { update(); }, updateFrequency - elapsedTime)
 }
 function main() {
-    initBoard();
+    init();
     setTimeout(function () { update(); }, updateFrequency)
 }
+
 $(document).ready(function () {
     $(document).keypress(function (event) {
         switch (event.keyCode) {
             case 37://Left
-                if (TheGuyDirection == directions['East'])
-                    return;
-                TheGuyDirection = directions['West'];
+                if (TheGuyDirection != directions['East'])
+                    TheGuyDirection = directions['West'];
                 event.preventDefault();
                 break;
             case 38://Up
-                if (TheGuyDirection == directions['South'])
-                    return;
-                TheGuyDirection = directions['North'];
+                if (TheGuyDirection != directions['South'])
+                    TheGuyDirection = directions['North'];
                 event.preventDefault();
                 break;
             case 39://Right
-                if (TheGuyDirection == directions['West'])
-                    return;
-                TheGuyDirection = directions['East'];
+                if (TheGuyDirection != directions['West'])
+                    TheGuyDirection = directions['East'];
                 event.preventDefault();
                 break;
             case 40://Down
-                if (TheGuyDirection == directions['North'])
-                    return;
-                TheGuyDirection = directions['South'];
+                if (TheGuyDirection != directions['North'])
+                    TheGuyDirection = directions['South'];
                 event.preventDefault();
                 break;
             default:
