@@ -1,0 +1,15 @@
+#board {
+    width: 400px;
+    height: 400px;
+}
+
+    #board > div {
+        width: 18px;
+        height: 18px;
+        display: inline-block;
+        border: 1px solid #CCC;
+    }
+
+        #board > div.TheGuy {
+            background-color: black;
+        }
