@@ -24,9 +24,9 @@ var map = Array();
 var TheGuyDirection;
 
 function init() {
-    for (i = 0; i < cellsY; i++) {
+    for (var i = 0; i < cellsY; i++) {
         map[i] = Array();
-        for (j = 0; j < cellsX; j++) {
+        for (var j = 0; j < cellsX; j++) {
             $('#board').append('<div id="' + j + posDelimiter + i + '"></div>');
             map[i][j] = 0;
         }
@@ -37,7 +37,7 @@ function init() {
     addTrolley(TheGuy);
     addTrolley(TheGuy);
     for (var i = 0; i < TheGuy.length; i++) {
-        $('#' + TheGuy[i].x + posDelimiter + TheGuy[i].y).addClass('TheGuy');
+        getMapDiv(TheGuy[i].x, TheGuy[i].y).addClass('TheGuy');
     }
 }
 
@@ -65,16 +65,16 @@ function addTrolley(guy) {
 }
 
 function getMapDiv(x, y) {
-    return $('#' + TheGuy[i].x + posDelimiter + TheGuy[i].y);
+    return $('#' + x + posDelimiter + y);
 }
 
 // Takes a new map 2d array and update the map divs
 function draw(newMap) {
-    for (i = 0; i < cellsY; i++) {
-        for (j = 0; j < cellsX; j++) {
+    for (var i = 0; i < cellsY; i++) {
+        for (var j = 0; j < cellsX; j++) {
             if (map[j][i] != newMap[j][i]) {
-                getMapDiv(j, i).removeClass(type[map[j][i]]);
-                getMapDiv(j, i).addClass(type[newMap[j][i]]);
+                getMapDiv(j, i).removeClass(types[map[j][i]]);
+                getMapDiv(j, i).addClass(types[newMap[j][i]]);
             }
         }
     }
@@ -83,27 +83,41 @@ function draw(newMap) {
 function update() {
     var startTime = new Date().getTime();
 
-    var newMap = map;//or from scratch?
-    if (Math.random() < chances["trolley"]) {
-        foundPos = false;
-        while (!foundPos) {
-        }
-    }
+    var newMap = Array();
 
     var oldEnd = TheGuy.pop();
-    $('#' + oldEnd.x + posDelimiter + oldEnd.y).removeClass('TheGuy');
+    getMapDiv(oldEnd.x, oldEnd.y).removeClass('TheGuy');
 
     var newHead = { x: TheGuy[0].x, y: TheGuy[0].y };
     move(newHead, TheGuyDirection);
     TheGuy.unshift(newHead);
-    $('#' + TheGuy[0].x + posDelimiter + TheGuy[0].y).addClass('TheGuy');
+    getMapDiv(TheGuy[0].x, TheGuy[0].y).addClass('TheGuy');
+    
+    // Randomly puts a trolley on the map
+    if (Math.random() < chances["trolley"]) {
+        var foundPos = false;
+        var x;
+        var y;
+        while (!foundPos) {
+            x = Math.round(Math.random() * cellsX);
+            y = Math.round(Math.random() * cellsY);
+            if (newMap[x][y] == 0) {
+                foundPos = true;
+                newMap[x][y] = types["trolley"];
+            }
+        }
+    }
+    
+    // Draw the newly generated map
+    draw(newMap);
+    map = newMap;
 
     var elapsedTime = (new Date().getTime()) - startTime;
-    setTimeout(function () { update(); }, updateFrequency - elapsedTime)
+    setTimeout(function() { update(); }, updateFrequency - elapsedTime);
 }
 function main() {
     init();
-    setTimeout(function () { update(); }, updateFrequency)
+    setTimeout(function() { update(); }, updateFrequency);
 }
 
 $(document).ready(function () {
