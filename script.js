@@ -4,38 +4,38 @@ var startPoint = { x: cellsX / 2, y: cellsY / 2 };
 var posDelimiter = '-';
 var updateFrequency = 100;
 var chances = {// per update
-    "trolley": 0.05
+    "trolley": 0.02
 };
 var directions = {
     'West': { x: -1, y: 0 },
     'East': { x: 1, y: 0 },
     'North': { x: 0, y: -1 },
-    'South': { x: 0, y: 1 },
+    'South': { x: 0, y: 1 }
 };
 var types = {
     0: 'none',
     2: 'TheGuy',
     3: 'trolley',
-    4: 'wall',
+    4: 'wall'
 };
 
-var TheGuy = Array();
-var map = Array();
+var TheGuy = [];
+var map = [];
 var TheGuyDirection;
 
 function init() {
-    for (var i = 0; i < cellsY; i++) {
-        map[i] = Array();
-        for (var j = 0; j < cellsX; j++) {
-            $('#board').append('<div id="' + j + posDelimiter + i + '"></div>');
-            map[i][j] = 0;
+    for (var y = 0; y < cellsY; y++) {
+        map[y] = [];
+        for (var x = 0; x < cellsX; x++) {
+            $('#board').append('<div id="' + x + posDelimiter + y + '"></div>');
+            map[y][x] = 0;
         }
     }
     TheGuyDirection = directions['East'];
     TheGuy.push({ x: startPoint.x, y: startPoint.y }); // Init
-    addTrolley(TheGuy);
-    addTrolley(TheGuy);
-    addTrolley(TheGuy);
+    addTrolleyToGuy(TheGuy);
+    addTrolleyToGuy(TheGuy);
+    addTrolleyToGuy(TheGuy);
     for (var i = 0; i < TheGuy.length; i++) {
         getMapDiv(TheGuy[i].x, TheGuy[i].y).addClass('TheGuy');
     }
@@ -58,7 +58,7 @@ function move(element, direction) {
     element.y = normalizePos(element.y, cellsY - 1);
 }
 
-function addTrolley(guy) {
+function addTrolleyToGuy(guy) {
     var index = Math.max(guy.length - 1, 0);
     var trolley = { x: guy[index].x, y: guy[index].y };
     guy.push(trolley);
@@ -68,13 +68,39 @@ function getMapDiv(x, y) {
     return $('#' + x + posDelimiter + y);
 }
 
+function createMap() {
+    var map = [0];
+    for (var y = 0; y < cellsY; y++) {
+        map[y] = Array();
+        for (var x = 0; x < cellsX; x++) {
+            map[y][x] = 0;
+        }
+    }
+    return map;
+}
+
 // Takes a new map 2d array and update the map divs
 function draw(newMap) {
-    for (var i = 0; i < cellsY; i++) {
-        for (var j = 0; j < cellsX; j++) {
-            if (map[j][i] != newMap[j][i]) {
-                getMapDiv(j, i).removeClass(types[map[j][i]]);
-                getMapDiv(j, i).addClass(types[newMap[j][i]]);
+    for (var y = 0; y < cellsY; y++) {
+        for (var x = 0; x < cellsX; x++) {
+            if (map[y][x] != newMap[y][x]) {
+                //getMapDiv(x, y).removeClass(types[map[y][x]]);
+                getMapDiv(x, y).addClass(types[newMap[y][x]]);
+            }
+        }
+    }
+}
+
+// Randomly puts a trolley on the map
+function addTrolleyToMap(map) {
+    if (Math.random() < chances["trolley"]) {
+        var foundPos = false;
+        while (!foundPos) {
+            var x = Math.round(Math.random() * cellsX-1);
+            var y = Math.round(Math.random() * cellsY-1);
+            if (map[y][x] === 0) {
+                foundPos = true;
+                map[y][x] = 3;
             }
         }
     }
@@ -83,31 +109,18 @@ function draw(newMap) {
 function update() {
     var startTime = new Date().getTime();
 
-    var newMap = Array();
+    var newMap = createMap();
 
     var oldEnd = TheGuy.pop();
     getMapDiv(oldEnd.x, oldEnd.y).removeClass('TheGuy');
 
-    var newHead = { x: TheGuy[0].x, y: TheGuy[0].y };
+    var newHead = {x: TheGuy[0].x, y: TheGuy[0].y};
     move(newHead, TheGuyDirection);
     TheGuy.unshift(newHead);
     getMapDiv(TheGuy[0].x, TheGuy[0].y).addClass('TheGuy');
     
-    // Randomly puts a trolley on the map
-    if (Math.random() < chances["trolley"]) {
-        var foundPos = false;
-        var x;
-        var y;
-        while (!foundPos) {
-            x = Math.round(Math.random() * cellsX);
-            y = Math.round(Math.random() * cellsY);
-            if (newMap[x][y] == 0) {
-                foundPos = true;
-                newMap[x][y] = types["trolley"];
-            }
-        }
-    }
-    
+    addTrolleyToMap(newMap);
+
     // Draw the newly generated map
     draw(newMap);
     map = newMap;

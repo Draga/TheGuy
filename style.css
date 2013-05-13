@@ -13,3 +13,6 @@
         #board > div.TheGuy {
             background-color: black;
         }
+        #board > div.trolley {
+            background-color: red;
+        }
